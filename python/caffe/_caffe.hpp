@@ -3,6 +3,8 @@
 
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
+#include <Python.h>  // NOLINT(build/include_alpha)
+
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include <numpy/arrayobject.h>
@@ -102,6 +104,12 @@ class PyNet {
   inline void check_contiguous_array(PyArrayObject* arr, string name,
       int channels, int height, int width);
 
+  void CopyTrainedLayersFrom(const string filename) {
+    net_->CopyTrainedLayersFrom(filename);
+  }
+  void ShareTrainedLayersWith(PyNet* other) {
+    net_->ShareTrainedLayersWith(other->net_.get());
+  }
   void Forward(int start, int end) { net_->ForwardFromTo(start, end); }
   void Backward(int start, int end) { net_->BackwardFromTo(start, end); }
   void Reshape() { net_->Reshape(); }
@@ -151,8 +159,13 @@ class PyNet {
   bp::dict raw_scale_;
   bp::dict channel_swap_;
 
+  // this is here only to satisfy boost's vector_indexing_suite
+  bool operator == (const PyNet &other) {
+      return this->net_ == other.net_;
+  }
+
  protected:
-  // The pointer to the internal caffe::Net instant.
+  // The pointer to the internal caffe::Net instance.
   shared_ptr<Net<float> > net_;
   // if taking input from an ndarray, we need to hold references
   bp::object input_data_;
@@ -164,11 +177,15 @@ class PySGDSolver {
   explicit PySGDSolver(const string& param_file);
 
   shared_ptr<PyNet> net() { return net_; }
+  vector<shared_ptr<PyNet> > test_nets() { return test_nets_; }
+  int iter() { return solver_->iter(); }
   void Solve() { return solver_->Solve(); }
+  void Step(int iters) { solver_->Step(iters); }
   void SolveResume(const string& resume_file);
 
  protected:
   shared_ptr<PyNet> net_;
+  vector<shared_ptr<PyNet> > test_nets_;
   shared_ptr<SGDSolver<float> > solver_;
 };
 
