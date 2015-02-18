@@ -8,6 +8,7 @@
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
 #include "caffe/layer.hpp"
+#include "caffe/net.hpp"
 #include "caffe/proto/caffe.pb.h"
 
 #define HDF5_DATA_DATASET_NAME "data"
@@ -29,9 +30,6 @@ class NeuronLayer : public Layer<Dtype> {
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_NONE;
-  }
   virtual inline int ExactNumBottomBlobs() const { return 1; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 };
@@ -54,9 +52,7 @@ class AbsValLayer : public NeuronLayer<Dtype> {
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_ABSVAL;
-  }
+  virtual inline const char* type() const { return "AbsVal"; }
   virtual inline int ExactNumBottomBlobs() const { return 1; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
@@ -113,9 +109,7 @@ class BNLLLayer : public NeuronLayer<Dtype> {
   explicit BNLLLayer(const LayerParameter& param)
       : NeuronLayer<Dtype>(param) {}
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_BNLL;
-  }
+  virtual inline const char* type() const { return "BNLL"; }
 
  protected:
   /// @copydoc BNLLLayer
@@ -173,9 +167,7 @@ class DropoutLayer : public NeuronLayer<Dtype> {
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_DROPOUT;
-  }
+  virtual inline const char* type() const { return "Dropout"; }
 
  protected:
   /**
@@ -233,9 +225,7 @@ class ExpLayer : public NeuronLayer<Dtype> {
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_EXP;
-  }
+  virtual inline const char* type() const { return "Exp"; }
 
  protected:
   /**
@@ -298,9 +288,7 @@ class PowerLayer : public NeuronLayer<Dtype> {
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_POWER;
-  }
+  virtual inline const char* type() const { return "Power"; }
 
  protected:
   /**
@@ -369,9 +357,7 @@ class ReLULayer : public NeuronLayer<Dtype> {
   explicit ReLULayer(const LayerParameter& param)
       : NeuronLayer<Dtype>(param) {}
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_RELU;
-  }
+  virtual inline const char* type() const { return "ReLU"; }
 
  protected:
   /**
@@ -432,7 +418,7 @@ template <typename Dtype>
 class CuDNNReLULayer : public ReLULayer<Dtype> {
  public:
   explicit CuDNNReLULayer(const LayerParameter& param)
-      : ReLULayer<Dtype>(param) {}
+      : ReLULayer<Dtype>(param), handles_setup_(false) {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -445,6 +431,7 @@ class CuDNNReLULayer : public ReLULayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
+  bool handles_setup_;
   cudnnHandle_t             handle_;
   cudnnTensor4dDescriptor_t bottom_desc_;
   cudnnTensor4dDescriptor_t top_desc_;
@@ -465,9 +452,7 @@ class SigmoidLayer : public NeuronLayer<Dtype> {
   explicit SigmoidLayer(const LayerParameter& param)
       : NeuronLayer<Dtype>(param) {}
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_SIGMOID;
-  }
+  virtual inline const char* type() const { return "Sigmoid"; }
 
  protected:
   /**
@@ -516,7 +501,7 @@ template <typename Dtype>
 class CuDNNSigmoidLayer : public SigmoidLayer<Dtype> {
  public:
   explicit CuDNNSigmoidLayer(const LayerParameter& param)
-      : SigmoidLayer<Dtype>(param) {}
+      : SigmoidLayer<Dtype>(param), handles_setup_(false) {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -529,6 +514,7 @@ class CuDNNSigmoidLayer : public SigmoidLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
+  bool handles_setup_;
   cudnnHandle_t             handle_;
   cudnnTensor4dDescriptor_t bottom_desc_;
   cudnnTensor4dDescriptor_t top_desc_;
@@ -549,9 +535,7 @@ class TanHLayer : public NeuronLayer<Dtype> {
   explicit TanHLayer(const LayerParameter& param)
       : NeuronLayer<Dtype>(param) {}
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_TANH;
-  }
+  virtual inline const char* type() const { return "TanH"; }
 
  protected:
   /**
@@ -602,7 +586,7 @@ template <typename Dtype>
 class CuDNNTanHLayer : public TanHLayer<Dtype> {
  public:
   explicit CuDNNTanHLayer(const LayerParameter& param)
-      : TanHLayer<Dtype>(param) {}
+      : TanHLayer<Dtype>(param), handles_setup_(false) {}
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
@@ -615,6 +599,7 @@ class CuDNNTanHLayer : public TanHLayer<Dtype> {
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
+  bool handles_setup_;
   cudnnHandle_t             handle_;
   cudnnTensor4dDescriptor_t bottom_desc_;
   cudnnTensor4dDescriptor_t top_desc_;
@@ -639,9 +624,7 @@ class ThresholdLayer : public NeuronLayer<Dtype> {
   virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_THRESHOLD;
-  }
+  virtual inline const char* type() const { return "Threshold"; }
 
  protected:
   /**

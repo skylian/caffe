@@ -11,9 +11,9 @@
 namespace caffe {
 
 template<typename Dtype>
-DataTransformer<Dtype>::DataTransformer(const TransformationParameter& param)
-    : param_(param) {
-  phase_ = Caffe::phase();
+DataTransformer<Dtype>::DataTransformer(const TransformationParameter& param,
+    Phase phase)
+    : param_(param), phase_(phase) {
   // check if we want to use mean_file
   if (param_.has_mean_file()) {
     CHECK_EQ(param_.mean_value_size(), 0) <<
@@ -80,7 +80,7 @@ void DataTransformer<Dtype>::Transform(const Datum& datum,
     height = crop_size;
     width = crop_size;
     // We only do random crop when we do training.
-    if (phase_ == Caffe::TRAIN) {
+    if (phase_ == TRAIN) {
       h_off = Rand(datum_height - crop_size + 1);
       w_off = Rand(datum_width - crop_size + 1);
     } else {
@@ -164,12 +164,32 @@ void DataTransformer<Dtype>::Transform(const vector<Datum> & datum_vector,
 
   CHECK_GT(datum_num, 0) << "There is no datum to add";
   CHECK_LE(datum_num, num) <<
-    "The size of datum_vector must be smaller than transformed_blob->num()";
+    "The size of datum_vector must be no greater than transformed_blob->num()";
   Blob<Dtype> uni_blob(1, channels, height, width);
   for (int item_id = 0; item_id < datum_num; ++item_id) {
     int offset = transformed_blob->offset(item_id);
     uni_blob.set_cpu_data(transformed_blob->mutable_cpu_data() + offset);
     Transform(datum_vector[item_id], &uni_blob);
+  }
+}
+
+template<typename Dtype>
+void DataTransformer<Dtype>::Transform(const vector<cv::Mat> & mat_vector,
+                                       Blob<Dtype>* transformed_blob) {
+  const int mat_num = mat_vector.size();
+  const int num = transformed_blob->num();
+  const int channels = transformed_blob->channels();
+  const int height = transformed_blob->height();
+  const int width = transformed_blob->width();
+
+  CHECK_GT(mat_num, 0) << "There is no MAT to add";
+  CHECK_EQ(mat_num, num) <<
+    "The size of mat_vector must be equals to transformed_blob->num()";
+  Blob<Dtype> uni_blob(1, channels, height, width);
+  for (int item_id = 0; item_id < mat_num; ++item_id) {
+    int offset = transformed_blob->offset(item_id);
+    uni_blob.set_cpu_data(transformed_blob->mutable_cpu_data() + offset);
+    Transform(mat_vector[item_id], &uni_blob);
   }
 }
 
@@ -227,7 +247,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat& cv_img,
     CHECK_EQ(crop_size, height);
     CHECK_EQ(crop_size, width);
     // We only do random crop when we do training.
-    if (phase_ == Caffe::TRAIN) {
+    if (phase_ == TRAIN) {
       h_off = Rand(img_height - crop_size + 1);
       w_off = Rand(img_width - crop_size + 1);
     } else {
@@ -305,7 +325,7 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype>* input_blob,
     CHECK_EQ(crop_size, height);
     CHECK_EQ(crop_size, width);
     // We only do random crop when we do training.
-    if (phase_ == Caffe::TRAIN) {
+    if (phase_ == TRAIN) {
       h_off = Rand(input_height - crop_size + 1);
       w_off = Rand(input_width - crop_size + 1);
     } else {
@@ -378,7 +398,7 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype>* input_blob,
 template <typename Dtype>
 void DataTransformer<Dtype>::InitRand() {
   const bool needs_rand = param_.mirror() ||
-      (phase_ == Caffe::TRAIN && param_.crop_size());
+      (phase_ == TRAIN && param_.crop_size());
   if (needs_rand) {
     const unsigned int rng_seed = caffe_rng_rand();
     rng_.reset(new Caffe::RNG(rng_seed));

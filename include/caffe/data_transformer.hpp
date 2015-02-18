@@ -16,7 +16,7 @@ namespace caffe {
 template <typename Dtype>
 class DataTransformer {
  public:
-  explicit DataTransformer(const TransformationParameter& param);
+  explicit DataTransformer(const TransformationParameter& param, Phase phase);
   virtual ~DataTransformer() {}
 
   /**
@@ -52,6 +52,18 @@ class DataTransformer {
 
   /**
    * @brief Applies the transformation defined in the data layer's
+   * transform_param block to a vector of Mat.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob's data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector<cv::Mat> & mat_vector,
+                Blob<Dtype>* transformed_blob);
+  /**
+   * @brief Applies the transformation defined in the data layer's
    * transform_param block to a cv::Mat
    *
    * @param cv_img
@@ -78,7 +90,7 @@ class DataTransformer {
  protected:
    /**
    * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
-   * 
+   *
    * @param n
    *    The upperbound (exclusive) value of the random number.
    * @return
@@ -92,7 +104,7 @@ class DataTransformer {
 
 
   shared_ptr<Caffe::RNG> rng_;
-  Caffe::Phase phase_;
+  Phase phase_;
   Blob<Dtype> data_mean_;
   vector<Dtype> mean_values_;
 };
