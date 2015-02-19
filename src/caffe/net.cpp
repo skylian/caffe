@@ -19,6 +19,17 @@
 namespace caffe {
 
 template <typename Dtype>
+void Net<Dtype>::ReshapePass(const vector<Blob<Dtype>*> &new_input) {
+  CHECK_EQ(new_input.size(), net_input_blobs_.size());
+  for (size_t i = 0; i < net_input_blobs_.size(); ++i) {
+    net_input_blobs_[i]->CopyFrom(*new_input[i], false, true);
+  }
+  for (int layer_id = 0; layer_id < layers_.size(); ++layer_id) {
+  	layers_[layer_id]->SetUp(bottom_vecs_[layer_id], &top_vecs_[layer_id]);
+  }
+}
+
+template <typename Dtype>
 Net<Dtype>::Net(const NetParameter& param) {
   Init(param);
 }

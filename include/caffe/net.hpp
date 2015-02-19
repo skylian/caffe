@@ -30,6 +30,9 @@ class Net {
   /// @brief Initialize a network with a NetParameter.
   void Init(const NetParameter& param);
 
+  /// @brief fill the network blobs with different shapes
+  void ReshapePass(const vector<Blob<Dtype>*> &new_input);
+
   /**
    * @brief Run Forward with the input Blob%s already fed separately.
    *
