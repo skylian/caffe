@@ -120,7 +120,6 @@ static mxArray* do_forward_flex(const mxArray* const bottom) {
 			break;
 		case Caffe::GPU:
 			caffe_copy(blob->count(), data_ptr, blob[i].mutable_gpu_data());
-			std::cout << "ok line 127" << std::endl;
 			break;
 		default:
 			LOG(FATAL) << "Unknown Caffe mode.";
