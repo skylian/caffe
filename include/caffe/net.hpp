@@ -31,7 +31,7 @@ class Net {
   void Init(const NetParameter& param);
 
   /// @brief fill the network blobs with different shapes
-  void ReshapePass(const vector<Blob<Dtype>*> &new_input);
+  void ReshapePass(const vector<shared_ptr<Blob<Dtype> > > &new_input);
 
   /**
    * @brief Run Forward with the input Blob%s already fed separately.

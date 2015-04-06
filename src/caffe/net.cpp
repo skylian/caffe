@@ -19,7 +19,7 @@
 namespace caffe {
 
 template <typename Dtype>
-void Net<Dtype>::ReshapePass(const vector<Blob<Dtype>*> &new_input) {
+void Net<Dtype>::ReshapePass(const vector<shared_ptr<Blob<Dtype> > > &new_input) {
   CHECK_EQ(new_input.size(), net_input_blobs_.size());
   for (size_t i = 0; i < net_input_blobs_.size(); ++i) {
     net_input_blobs_[i]->CopyFrom(*new_input[i], false, true);

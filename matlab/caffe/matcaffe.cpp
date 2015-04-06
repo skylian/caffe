@@ -97,7 +97,7 @@ static mxArray* do_forward(const mxArray* const bottom) {
 }
 
 static mxArray* do_forward_flex(const mxArray* const bottom) {
-	vector<Blob<float>*> input_blobs;
+	vector<shared_ptr<Blob<float> > > input_blobs;
 
 	const size_t input_size = static_cast<size_t>(mxGetDimensions(bottom)[0]);
 	for (unsigned int i = 0; i < input_size; ++i) {
@@ -111,15 +111,15 @@ static mxArray* do_forward_flex(const mxArray* const bottom) {
 		int width = dims[0], height = dims[1], channels = dims[2];
 		int num = (num_dims==4) ? dims[3] : 1;
 
-		Blob<float> *blob = new Blob<float>(num, channels, height, width);
+		shared_ptr<Blob<float> > blob(new Blob<float>(num, channels, height, width));
 		const float* const data_ptr =
 				reinterpret_cast<const float* const>(mxGetPr(elem));
 		switch (Caffe::mode()) {
 		case Caffe::CPU:
-			caffe_copy(blob->count(), data_ptr, blob[i].mutable_cpu_data());
+			caffe_copy(blob->count(), data_ptr, blob->mutable_cpu_data());
 			break;
 		case Caffe::GPU:
-			caffe_copy(blob->count(), data_ptr, blob[i].mutable_gpu_data());
+			caffe_copy(blob->count(), data_ptr, blob->mutable_gpu_data());
 			break;
 		default:
 			LOG(FATAL) << "Unknown Caffe mode.";

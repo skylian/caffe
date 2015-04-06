@@ -212,6 +212,66 @@ class DropoutLayer : public NeuronLayer<Dtype> {
   unsigned int uint_thres_;
 };
 
+
+/**
+ * @brief During training only, replaces each pixel with a random pixel
+ * 		from a neighborhood of the specified radius.
+ *
+ * @param bottom input Blob vector (length 1)
+ *   -# @f$ (N \times C \times H \times W) @f$
+ *      the inputs @f$ x @f$
+ * @param top output Blob vector (length 1)
+ *   -# @f$ (N \times C \times H \times W) @f$
+ */
+template <typename Dtype>
+class JitterLayer : public NeuronLayer<Dtype> {
+ public:
+  /**
+   * @param param provides JitterParameter jitter_param,
+   *     with jittering option:
+   *   - jitter_radius (\b optional, default 3).
+   */
+  explicit JitterLayer(const LayerParameter& param)
+      : NeuronLayer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      vector<Blob<Dtype>*>* top);
+  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+      vector<Blob<Dtype>*>* top);
+
+  virtual inline LayerParameter_LayerType type() const {
+    return LayerParameter_LayerType_JITTER;
+  }
+
+ protected:
+  /**
+   * @param bottom input Blob vector (length 1)
+   *   -# @f$ (N \times C \times H \times W) @f$
+   *      the inputs @f$ x @f$
+   * @param top output Blob vector (length 1)
+   *   -# @f$ (N \times C \times H \times W) @f$
+   *      the computed outputs. At training time, we have @f$
+   *      y_{\mbox{train}} = \left\{
+   *         \begin{array}{ll}
+   *            \frac{x}{1 - p} & \mbox{if } u > p \\
+   *            0 & \mbox{otherwise}
+   *         \end{array} \right.
+   *      @f$, where @f$ u \sim U(0, 1)@f$ is generated independently for each
+   *      input at each iteration. At test time, we simply have
+   *      @f$ y_{\mbox{test}} = \mathbb{E}[y_{\mbox{train}}] = x @f$.
+   */
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      vector<Blob<Dtype>*>* top);
+//  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+//      vector<Blob<Dtype>*>* top);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom) {};
+//  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+//      const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom) {};
+
+  unsigned int jitter_radius_;
+  float jitter_ratio_;
+};
+
 /**
  * @brief Computes @f$ y = (\alpha x + \beta) ^ \gamma @f$,
  *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
