@@ -10,7 +10,7 @@ namespace caffe {
 
 template<typename Dtype>
 void JitterLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-		vector<Blob<Dtype>*>* top) {
+		const vector<Blob<Dtype>*>& top) {
 	NeuronLayer<Dtype>::LayerSetUp(bottom, top);
 	jitter_radius_ = this->layer_param_.jitter_param().jitter_radius();
 	jitter_ratio_ = this->layer_param_.jitter_param().jitter_ratio();
@@ -20,15 +20,15 @@ void JitterLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 
 template<typename Dtype>
 void JitterLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
-		vector<Blob<Dtype>*>* top) {
+		const vector<Blob<Dtype>*>& top) {
 	NeuronLayer<Dtype>::Reshape(bottom, top);
 }
 
 template<typename Dtype>
 void JitterLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
-		vector<Blob<Dtype>*>* top) {
+		const vector<Blob<Dtype>*>& top) {
 	const Dtype* bottom_data = bottom[0]->cpu_data();
-	Dtype* top_data = (*top)[0]->mutable_cpu_data();
+	Dtype* top_data = top[0]->mutable_cpu_data();
 
 	int dim = bottom[0]->count() / bottom[0]->num();
 	int height = bottom[0]->height();
@@ -67,5 +67,6 @@ STUB_GPU(JitterLayer);
 #endif
 
 INSTANTIATE_CLASS(JitterLayer);
+REGISTER_LAYER_CLASS(Dropout);
 
 }  // namespace caffe
