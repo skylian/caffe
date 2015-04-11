@@ -828,6 +828,14 @@ bool UpgradeV1LayerParameter(const V1LayerParameter& v1_layer_param,
     layer_param->mutable_loss_param()->CopyFrom(
         v1_layer_param.loss_param());
   }
+  if (v1_layer_param.has_jitter_param()) {
+      layer_param->mutable_jitter_param()->CopyFrom(
+          v1_layer_param.jitter_param());
+    }
+  if (v1_layer_param.has_select_param()) {
+      layer_param->mutable_select_param()->CopyFrom(
+          v1_layer_param.select_param());
+    }
   if (v1_layer_param.has_layer()) {
     LOG(ERROR) << "Input NetParameter has V0 layer -- ignoring.";
     is_fully_compatible = false;
@@ -913,6 +921,8 @@ const char* UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
     return "Split";
   case V1LayerParameter_LayerType_SLICE:
     return "Slice";
+  case V1LayerParameter_LayerType_SELECT:
+        return "Select";
   case V1LayerParameter_LayerType_TANH:
     return "TanH";
   case V1LayerParameter_LayerType_WINDOW_DATA:

@@ -67,6 +67,6 @@ STUB_GPU(JitterLayer);
 #endif
 
 INSTANTIATE_CLASS(JitterLayer);
-REGISTER_LAYER_CLASS(Dropout);
+REGISTER_LAYER_CLASS(Jitter);
 
 }  // namespace caffe
