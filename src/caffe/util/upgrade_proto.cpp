@@ -545,6 +545,13 @@ bool NetNeedsDataUpgrade(const NetParameter& net_param) {
       if (layer_param.has_crop_size()) { return true; }
       if (layer_param.has_mirror()) { return true; }
     }
+    if (net_param.layers(i).type() == V1LayerParameter_LayerType_WINDOW_DATA_MULTI) {
+          WindowDataMultiParameter layer_param = net_param.layers(i).window_data_multi_param();
+          if (layer_param.has_scale()) { return true; }
+          if (layer_param.has_mean_file()) { return true; }
+          if (layer_param.has_crop_size()) { return true; }
+          if (layer_param.has_mirror()) { return true; }
+    }
   }
   return false;
 }
@@ -579,7 +586,8 @@ void UpgradeNetDataTransformation(NetParameter* net_param) {
   for (int i = 0; i < net_param->layers_size(); ++i) {
     CONVERT_LAYER_TRANSFORM_PARAM(DATA, Data, data);
     CONVERT_LAYER_TRANSFORM_PARAM(IMAGE_DATA, ImageData, image_data);
-    CONVERT_LAYER_TRANSFORM_PARAM(WINDOW_DATA, WindowData, window_data);
+    CONVERT_LAYER_TRANSFORM_PARAM(WINDOW_DATA, WindowData, window_data);\
+    CONVERT_LAYER_TRANSFORM_PARAM(WINDOW_DATA_MULTI, WindowDataMulti, window_data_multi);
   }
 }
 
@@ -831,11 +839,15 @@ bool UpgradeV1LayerParameter(const V1LayerParameter& v1_layer_param,
   if (v1_layer_param.has_jitter_param()) {
       layer_param->mutable_jitter_param()->CopyFrom(
           v1_layer_param.jitter_param());
-    }
+  }
   if (v1_layer_param.has_select_param()) {
       layer_param->mutable_select_param()->CopyFrom(
           v1_layer_param.select_param());
-    }
+  }
+  if (v1_layer_param.has_window_data_multi_param()) {
+      layer_param->mutable_window_data_multi_param()->CopyFrom(
+          v1_layer_param.window_data_multi_param());
+  }
   if (v1_layer_param.has_layer()) {
     LOG(ERROR) << "Input NetParameter has V0 layer -- ignoring.";
     is_fully_compatible = false;
@@ -927,6 +939,8 @@ const char* UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
     return "TanH";
   case V1LayerParameter_LayerType_WINDOW_DATA:
     return "WindowData";
+  case V1LayerParameter_LayerType_WINDOW_DATA_MULTI:
+      return "WindowDataMulti";
   case V1LayerParameter_LayerType_THRESHOLD:
     return "Threshold";
   default:

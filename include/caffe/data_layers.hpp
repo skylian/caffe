@@ -325,6 +325,41 @@ class WindowDataLayer : public BasePrefetchingDataLayer<Dtype> {
   vector<std::pair<std::string, Datum > > image_database_cache_;
 };
 
+
+/**
+ * @brief Vector-label version of the WindowData layer.
+ *
+ */
+template <typename Dtype>
+class WindowDataMultiLayer : public BasePrefetchingDataLayer<Dtype> {
+ public:
+  explicit WindowDataMultiLayer(const LayerParameter& param)
+      : BasePrefetchingDataLayer<Dtype>(param) {}
+  virtual ~WindowDataMultiLayer();
+  virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual inline const char* type() const { return "WindowDataMulti"; }
+  virtual inline int ExactNumBottomBlobs() const { return 0; }
+  virtual inline int ExactNumTopBlobs() const { return 2; }
+
+ protected:
+  virtual unsigned int PrefetchRand();
+  virtual void InternalThreadEntry();
+
+  shared_ptr<Caffe::RNG> prefetch_rng_;
+  vector<std::pair<std::string, vector<int> > > image_database_;
+  int dim_label_;
+  enum WindowField { IMAGE_INDEX, X1, Y1, X2, Y2, LABEL_START };
+  vector<vector<float> > fg_windows_;
+  Blob<Dtype> data_mean_;
+  vector<Dtype> mean_values_;
+  bool has_mean_file_;
+  bool has_mean_values_;
+  bool cache_images_;
+  vector<std::pair<std::string, Datum > > image_database_cache_;
+};
+
 }  // namespace caffe
 
 #endif  // CAFFE_DATA_LAYERS_HPP_
