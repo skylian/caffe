@@ -146,8 +146,12 @@ void WindowDataMultiLayer<Dtype>::DataLayerSetUp(
 	<< top[0]->channels() << "," << top[0]->height() << ","
 	<< top[0]->width();
 	// label
-	vector<int> label_shape(batch_size, dim_label_);
+	vector<int> label_shape;
+	label_shape.push_back(batch_size);
+	label_shape.push_back(dim_label_);
 	top[1]->Reshape(label_shape);
+	LOG(INFO) << "output label size: " << top[1]->num() << ","
+		<< top[1]->channels();
 	this->prefetch_label_.Reshape(label_shape);
 
 	// data mean
@@ -393,7 +397,7 @@ void WindowDataMultiLayer<Dtype>::InternalThreadEntry() {
 		for (int k = 0; k < dim_label_; ++k)
 			top_label[item_id*dim_label_+k] = window[WindowDataMultiLayer< Dtype>::LABEL_START+k];
 
-#if 1
+#if 0
 		// useful debugging code for dumping transformed windows to disk
 		string file_id;
 		std::stringstream ss;
