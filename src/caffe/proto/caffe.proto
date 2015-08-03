@@ -626,12 +626,6 @@ message InnerProductParameter {
   optional int32 axis = 5 [default = 1];
 }
 
-// Message that stores parameters used by JitterLayer
-message JitterParameter {
-  optional float jitter_ratio = 1 [default = 0.5]; // jitter ratio
-  optional uint32 jitter_radius = 2 [default = 3]; // neighborhood size
-}
-
 // Message that stores parameters used by LogLayer
 message LogParameter {
   // LogLayer computes outputs y = log_base(shift + scale * x), for base > 0.
@@ -757,16 +751,6 @@ message ReLUParameter {
     CUDNN = 2;
   }
   optional Engine engine = 2 [default = DEFAULT];
-}
-
-// Message that stores parameters used by SelectLayer
-message SelectParameter {
-  optional int32 block_size = 1 [default = 1];
-  optional SelectType select_type = 2 [default = INCLUDE];
-  enum SelectType {
-  	INCLUDE = 0;
-  	EXCLUDE = 1;
-  }
 }
 
 message ReshapeParameter {
@@ -914,34 +898,6 @@ message WindowDataParameter {
   optional string root_folder = 13 [default = ""];
 }
 
-// Message that stores parameters used by WindowDataLayer
-message WindowDataMultiParameter {
-  // Specify the data source.
-  optional string source = 1;
-  // For data pre-processing, we can do simple scaling and subtracting the
-  // data mean, if provided. Note that the mean subtraction is always carried
-  // out before scaling.
-  optional float scale = 2 [default = 1];
-  optional string mean_file = 3;
-  // Specify the batch size.
-  optional uint32 batch_size = 4;
-  // Specify if we would like to randomly crop an image.
-  optional uint32 crop_size = 5 [default = 0];
-  // Specify if we want to randomly mirror data.
-  optional bool mirror = 6 [default = false];
-  // Amount of contextual padding to add around a window
-  // (used only by the window_data_layer)
-  optional uint32 context_pad = 10 [default = 0];
-  // Mode for cropping out a detection window
-  // warp: cropped window is warped to a fixed size and aspect ratio
-  // square: the tightest square around the window is cropped
-  optional string crop_mode = 11 [default = "warp"];
-  // cache_images: will load all images in memory for faster access
-  optional bool cache_images = 12 [default = false];
-  // append root_folder to locate images
-  optional string root_folder = 13 [default = ""];
-}
-
 message SPPParameter {
   enum PoolMethod {
     MAX = 0;
@@ -1006,9 +962,9 @@ message V1LayerParameter {
     TANH = 23;
     WINDOW_DATA = 24;
     THRESHOLD = 31;
-    JITTER = 40;
-    SELECT = 41;
-    WINDOW_DATA_MULTI = 42;
+    JITTER = 100;
+    SELECT = 101;
+    WINDOW_DATA_MULTI = 102;
   }
   optional LayerType type = 5;
   repeated BlobProto blobs = 6;
@@ -1051,9 +1007,9 @@ message V1LayerParameter {
   optional WindowDataParameter window_data_param = 20;
   optional TransformationParameter transform_param = 36;
   optional LossParameter loss_param = 42;
-  optional JitterParameter jitter_param = 43;
-  optional SelectParameter select_param = 44;
-  optional WindowDataMultiParameter window_data_multi_param = 45;
+  optional JitterParameter jitter_param = 100;
+  optional SelectParameter select_param = 101;
+  optional WindowDataMultiParameter window_data_multi_param = 102;
   optional V0LayerParameter layer = 1;
 }
 
@@ -1159,4 +1115,48 @@ message PReLUParameter {
   optional FillerParameter filler = 1;
   // Whether or not slope paramters are shared across channels.
   optional bool channel_shared = 2 [default = false];
+}
+
+// Message that stores parameters used by JitterLayer
+message JitterParameter {
+  optional float jitter_ratio = 1 [default = 0.5]; // jitter ratio
+  optional uint32 jitter_radius = 2 [default = 3]; // neighborhood size
+}
+
+// Message that stores parameters used by SelectLayer
+message SelectParameter {
+  optional int32 block_size = 1 [default = 1];
+  optional SelectType select_type = 2 [default = INCLUDE];
+  enum SelectType {
+    INCLUDE = 0;
+    EXCLUDE = 1;
+  }
+}
+
+// Message that stores parameters used by WindowDataLayer
+message WindowDataMultiParameter {
+  // Specify the data source.
+  optional string source = 1;
+  // For data pre-processing, we can do simple scaling and subtracting the
+  // data mean, if provided. Note that the mean subtraction is always carried
+  // out before scaling.
+  optional float scale = 2 [default = 1];
+  optional string mean_file = 3;
+  // Specify the batch size.
+  optional uint32 batch_size = 4;
+  // Specify if we would like to randomly crop an image.
+  optional uint32 crop_size = 5 [default = 0];
+  // Specify if we want to randomly mirror data.
+  optional bool mirror = 6 [default = false];
+  // Amount of contextual padding to add around a window
+  // (used only by the window_data_layer)
+  optional uint32 context_pad = 10 [default = 0];
+  // Mode for cropping out a detection window
+  // warp: cropped window is warped to a fixed size and aspect ratio
+  // square: the tightest square around the window is cropped
+  optional string crop_mode = 11 [default = "warp"];
+  // cache_images: will load all images in memory for faster access
+  optional bool cache_images = 12 [default = false];
+  // append root_folder to locate images
+  optional string root_folder = 13 [default = ""];
 }
