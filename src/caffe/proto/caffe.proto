@@ -270,13 +270,14 @@ message ParamSpec {
 // Update the next available ID when you add a new LayerParameter field.
 //
 
-// LayerParameter next available layer-specific ID: 137 (last added: reduction_param)
+// LayerParameter next available layer-specific ID: 141 (last added: check_shape)
 message LayerParameter {
   optional string name = 1; // the layer name
   optional string type = 2; // the layer type
   repeated string bottom = 3; // the name of each bottom blob
   repeated string top = 4; // the name of each top blob
-
+  optional bool check_shape = 140 [default = true];
+  
   // The train / test phase for computation.
   optional Phase phase = 10;
 
@@ -352,9 +353,9 @@ message LayerParameter {
   optional TanHParameter tanh_param = 127;
   optional ThresholdParameter threshold_param = 128;
   optional WindowDataParameter window_data_param = 129;
-  optional JitterParameter jitter_param = 200;
-  optional SelectParameter select_param = 201;
-  optional WindowDataMultiParameter window_data_multi_param = 202;
+  optional JitterParameter jitter_param = 137;
+  optional SelectParameter select_param = 138;
+  optional WindowDataMultiParameter window_data_multi_param = 139;
 }
 
 // Message that stores parameters used to apply transformation

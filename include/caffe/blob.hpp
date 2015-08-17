@@ -177,6 +177,7 @@ class Blob {
     }
     return offset;
   }
+
   /**
    * @brief Copy from a source Blob.
    *
@@ -217,15 +218,15 @@ class Blob {
     return diff_;
   }
 
-  const Dtype* cpu_data() const;
+  const Dtype* cpu_data(const int n = 0, const int c = 0, const int h = 0, const int w = 0) const;
   void set_cpu_data(Dtype* data);
-  const Dtype* gpu_data() const;
-  const Dtype* cpu_diff() const;
-  const Dtype* gpu_diff() const;
-  Dtype* mutable_cpu_data();
-  Dtype* mutable_gpu_data();
-  Dtype* mutable_cpu_diff();
-  Dtype* mutable_gpu_diff();
+  const Dtype* gpu_data(const int n = 0, const int c = 0, const int h = 0, const int w = 0) const;
+  const Dtype* cpu_diff(const int n = 0, const int c = 0, const int h = 0, const int w = 0) const;
+  const Dtype* gpu_diff(const int n = 0, const int c = 0, const int h = 0, const int w = 0) const;
+  Dtype* mutable_cpu_data(const int n = 0, const int c = 0, const int h = 0, const int w = 0);
+  Dtype* mutable_gpu_data(const int n = 0, const int c = 0, const int h = 0, const int w = 0);
+  Dtype* mutable_cpu_diff(const int n = 0, const int c = 0, const int h = 0, const int w = 0);
+  Dtype* mutable_gpu_diff(const int n = 0, const int c = 0, const int h = 0, const int w = 0);
   void Update();
   void FromProto(const BlobProto& proto, bool reshape = true);
   void ToProto(BlobProto* proto, bool write_diff = false) const;

@@ -464,10 +464,6 @@ class SPPLayer : public Layer<Dtype> {
  public:
   explicit SPPLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}
-  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
-  virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
-      const vector<Blob<Dtype>*>& top);
 
   virtual inline const char* type() const { return "SPP"; }
   virtual inline int ExactNumBottomBlobs() const { return 1; }
@@ -517,6 +513,10 @@ class SPPLayer : public Layer<Dtype> {
   vector<Blob<Dtype>*> concat_bottom_vec_;
   /// the internal Concat layers that the Flatten layers feed into
   shared_ptr<ConcatLayer<Dtype> > concat_layer_;
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 };
 
 }  // namespace caffe
