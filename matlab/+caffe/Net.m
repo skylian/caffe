@@ -117,6 +117,21 @@ classdef Net < handle
         res{n} = self.blobs(self.inputs{n}).get_diff();
       end
     end
+    function res = backward_from(self, blob_diff, layer_name)
+      CHECK(iscell(blob_diff), 'output_diff must be a cell array');
+      CHECK(length(blob_diff) == length(self.outputs), ...
+        'output diff cell length must match output blob number');
+      % copy diff to output blobs
+      for n = 1:length(self.outputs)
+        self.blobs(self.outputs{n}).set_diff(blob_diff{n});
+      end
+      self.backward_prefilled();
+      % retrieve diff from input blobs
+      res = cell(length(self.inputs), 1);
+      for n = 1:length(self.inputs)
+        res{n} = self.blobs(self.inputs{n}).get_diff();
+      end
+    end
     function copy_from(self, weights_file)
       CHECK(ischar(weights_file), 'weights_file must be a string');
       CHECK_FILE_EXIST(weights_file);
